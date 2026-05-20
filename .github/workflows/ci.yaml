@@ -71,7 +71,7 @@ jobs:
           # live under doc/readme/ (and its sub-trees). Count tracked files only
           # so gitignored scratch dirs (OpenBase/, usd_model/) cannot skew the
           # numbers.
-          en=$(git ls-files 'README.md' '**/README.md' | grep -v '^doc/readme/' | wc -l)
+          en=$(git ls-files 'README.md' '**/README.md' | grep -cv '^doc/readme/')
           tw=$(git ls-files '*README.zh-TW.md' | wc -l)
           cn=$(git ls-files '*README.zh-CN.md' | wc -l)
           ja=$(git ls-files '*README.ja.md' | wc -l)
