@@ -1,0 +1,18 @@
+# 2D LiDAR — SLAMTEC RPLIDAR S2E
+# RTX LiDAR with 2D profile, publishes sensor_msgs/LaserScan
+
+mount:
+  parent_prim: "/World/Robot/base_link"
+  pose:
+    xyz: [0.2, 0, 0.1]
+    rpy: [0, 0, 0]
+
+sensor:
+  category: lidar
+  type: lidar_2d
+  profile: "SLAMTEC/RPLIDAR_S2E"
+
+ros:
+  topic_prefix: "/scan"
+  frame_id_prefix: "base_scan"
+  publish_type: "laser_scan"
