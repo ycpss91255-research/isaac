@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "script"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "script"))
 import import_model
 
 
