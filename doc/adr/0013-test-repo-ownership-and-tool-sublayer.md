@@ -2,7 +2,7 @@
 
 ADR-0011 split tests across two runner classes (hosted vs self-hosted GPU) but left two questions unresolved: which *repo* owns each test class, and how to colocate tests written for different runners (bats / pytest / future gtest) without breaking discovery. Both gaps surfaced concretely during local validation of `#46` + `ycpss91255-docker/isaac#63`: the workspace's `smoke-test.yaml` tried to reach across a submodule into the docker container, and the docker repo's `python-tests` job collected zero tests because the skip-check could not distinguish a directory of `.bats` files from a directory of pytest files.
 
-**Decision**: (1) `ycpss91255/isaac` (this repo) owns *unit* tests only; `ycpss91255-docker/isaac` owns *smoke* and *integration* tests. (2) Adopt the `test/<category>/<tool>/` sublayer in any repo whose `test/<category>/` contains tests from more than one tool/language.
+**Decision**: (1) `ycpss91255-research/isaac` (this repo, transferred from `ycpss91255/isaac` on 2026-05-28 -- see ADR-0012) owns *unit* tests only; `ycpss91255-docker/isaac` owns *smoke* and *integration* tests. (2) Adopt the `test/<category>/<tool>/` sublayer in any repo whose `test/<category>/` contains tests from more than one tool/language.
 
 ## Considered Options — repo ownership
 
@@ -25,7 +25,7 @@ ADR-0011 split tests across two runner classes (hosted vs self-hosted GPU) but l
 - This PR (`#46`) drops `.github/workflows/smoke-test.yaml` and retargets `unit-test.yaml` at `test/unit/pytest/`. No workspace-owned smoke job remains.
 - `ycpss91255-docker/isaac#63` adopts Layout B for repo-local bats (5 files moved to `test/smoke/bats/`) and rewrites the `python-tests` skip-check to inspect `test/<category>/pytest/`.
 - The four implementation PRs (`#38` `#39` `#40` `#41`) move their unit tests from `test/unit/test_*.py` to `test/unit/pytest/test_*.py` and update the `parents[2]` → `parents[3]` `sys.path` climb. Done in the same change set per the `P` rollout choice (full migration now, not deferred).
-- Future workspace smoke tests do *not* land in `ycpss91255/isaac/test/smoke/`; they are written against `ycpss91255-docker/isaac` and exercised by that repo's `python-tests` job once the runtime-test stage carries pytest (issue **#59** closed, PR **#60** merged).
+- Future workspace smoke tests do *not* land in `ycpss91255-research/isaac/test/smoke/`; they are written against `ycpss91255-docker/isaac` and exercised by that repo's `python-tests` job once the runtime-test stage carries pytest (issue **#59** closed, PR **#60** merged).
 
 ## Cross-repo gating
 
@@ -34,8 +34,9 @@ Out of scope for this ADR. If we later want docker repo's smoke job to gate work
 ## References
 
 - ADR-0011 — CI architecture: hosted vs self-hosted runner split.
+- ADR-0012 — `ycpss91255-research` org split + dual org-level GPU runners (the org-boundary decision this ADR's repo-ownership rule sits on top of).
 - `ycpss91255-docker/base#473` — proposed org-wide `test/<category>/<tool>/` convention.
 - `ycpss91255-docker/isaac#64` — local adoption tracking issue.
 - `ycpss91255-docker/isaac#63` — first PR carrying the layout (bats moved + skip-check rewritten).
-- `ycpss91255/isaac#46` — this PR (workspace CI workflows).
-- `ycpss91255/isaac#38` / `#39` / `#40` / `#41` — implementation PRs migrating to `test/unit/pytest/`.
+- `ycpss91255-research/isaac#46` — this PR (workspace CI workflows).
+- `ycpss91255-research/isaac#38` / `#39` / `#40` / `#41` — implementation PRs migrating to `test/unit/pytest/`.

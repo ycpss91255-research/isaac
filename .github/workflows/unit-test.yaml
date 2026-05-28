@@ -1,6 +1,6 @@
 name: Unit Tests
 
-# Per ADR-0011 + ADR-0012: workspace owns unit tests only. Smoke and
+# Per ADR-0011 + ADR-0013: workspace owns unit tests only. Smoke and
 # integration tests live in ycpss91255-docker/isaac (env-dependent,
 # run in devel-test container on self-hosted GPU). Unit tests under
 # test/unit/pytest/ are pure Python (pytest + pyyaml), no Isaac Sim
