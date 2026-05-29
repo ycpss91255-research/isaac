@@ -91,6 +91,9 @@ def setup_camera(cfg, stage):
     """
     from isaacsim.core.utils.extensions import enable_extension
 
+    # Single validation entry: guards direct callers that bypass load_config.
+    validate_camera(cfg, source=cfg.get("_source", "<cfg>"))
+
     sensor_type = cfg["sensor"]["type"]
     enable_extension("isaacsim.ros2.bridge")
 
@@ -160,9 +163,8 @@ def _setup_realsense(cfg, stage):
         "ir_right": (f"{rsd455_root}/Camera_OmniVision_OV9782_Right", "rgb",   "ir_right_optical_frame"),
     }
 
+    # validate_camera (called from setup_camera) guarantees >= 1 enabled stream.
     enabled = [s for s, on in streams.items() if on and s in stream_map]
-    if not enabled:
-        raise ValueError("streams: at least one of color/depth/ir_left/ir_right must be true")
 
     graph_path = f"/World/CameraGraphs/{frame_id_prefix}_realsense"
     nodes, set_values, connects = _build_graph_topology(
@@ -201,9 +203,9 @@ def _setup_custom(cfg, stage):
     if not stage.GetPrimAtPath(parent_path).IsValid():
         raise ValueError(f"parent_prim does not exist: {parent_path}")
 
-    sensors = cfg.get("sensors")
-    if not isinstance(sensors, list) or not sensors:
-        raise ValueError("custom: cfg.sensors must be a non-empty list")
+    # validate_camera (called from setup_camera) guarantees sensors is a
+    # non-empty list with required keys, unique names, and valid roles.
+    sensors = cfg["sensors"]
 
     frame_id_prefix = cfg["ros"]["frame_id_prefix"]
     topic_prefix = cfg["ros"]["topic_prefix"].rstrip("/")
@@ -214,15 +216,8 @@ def _setup_custom(cfg, stage):
 
     stream_map = {}
     overrides = {}
-    seen_names = set()
     for entry in sensors:
-        for key in ("role", "name", "pose", "resolution", "hfov", "vfov"):
-            if key not in entry:
-                raise ValueError(f"custom: sensors[] entry missing '{key}'")
         name = entry["name"]
-        if name in seen_names:
-            raise ValueError(f"custom: duplicate sensors[] name '{name}'")
-        seen_names.add(name)
         helper_type = _role_to_helper_type(entry["role"])
         camera_path = f"{mount_path}/{name}"
         cam_prim = stage.DefinePrim(camera_path, "Camera")
